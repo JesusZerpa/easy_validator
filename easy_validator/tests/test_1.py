@@ -45,6 +45,18 @@ def test_isoformat():
         })
     assert True
 
+def test_isostringformat():
+    from easy_validator import util_validator,ValidationError
+    from datetime import datetime
+
+    util_validator.validate({
+            "date":datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        },{
+            "date":util_validator.is_isostringformat(required=True)
+        })
+    assert True
+
+
 def test_not_isoformat():
     from easy_validator import util_validator,ValidationError
     try:

@@ -171,6 +171,25 @@ class UtilValidator(Validator):
         exists_register.required=required
         return exists_register
 
+    def is_isostringformat(self,required=False):
+        
+
+        def is_isostringformat(date_string):
+            """Valida si una cadena de texto es isoformat 
+
+            >>> is_isoformat('2022-09-30T00:25:40.338953')
+            True
+            """
+
+            from datetime import datetime
+            try:
+                datetime.strptime(date_string,"%Y-%m-%dT%H:%M:%S.%fZ")
+                return True
+            except ValueError:
+                return False
+        is_isostringformat.required=required
+        return is_isostringformat
+
     def is_isoformat(self,required=False):
         
 
@@ -189,10 +208,10 @@ class UtilValidator(Validator):
         is_isoformat.required=required
         return is_isoformat
 
-    def is_zisoformat(self,required=False):
+    def is_isoformat(self,required=False):
         
 
-        def is_zisoformat(date_string):
+        def is_isoformat(date_string):
             """Valida si una cadena de texto es isoformat 
 
             >>> is_isoformat('2022-09-30T00:25:40.338953')
@@ -200,12 +219,12 @@ class UtilValidator(Validator):
             """
             from datetime import datetime
             try:
-                datetime.fromisoformat(date_string.replace("Z","+00:00"))
+                datetime.fromisoformat(date_string)
                 return True
             except ValueError:
                 return False
-        is_zisoformat.required=required
-        return is_zisoformat
+        is_isoformat.required=required
+        return is_isoformat
 
 def replace(data,path,fn):
     path=path.split(".")
@@ -229,16 +248,34 @@ def replace_default(data:dict,default:dict):
                 data[elem]=default[elem]
             elif type(data[elem])==dict:
                 recusive(data[elem],default[elem])
-    recusive(data,default)
+    if type(data)==dict:
+        recusive(data,default)
 
 class ValidationError(Exception):
     pass
 class ValidationRequired(Exception):
     pass
-def check(fn,required=False):
+def check(fn=lambda x:True,required=False):
     fn.required=required
     return fn
-util_validator=UtilValidator()
+def group(*validators):
+    required=False
+    for validator in validators:
+        if validator.required:
+            required=True
+            break
+    def wrapper(x):
+        for validator in validators:
+            validator(x)
+    wrapper.required=required
+    return wrapper
+
+def from_isostring(str_date):
+    return date_time.strptime(str_date,"%Y-%m-%dT%H:%M:%S.%fZ")
+    
+def to_isostring(date_time):
+    return date_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+util_validator=UtilValidator("quart")
 if __name__=="__main__":
     import doctest
     doctest.testmod(verbose=True)
