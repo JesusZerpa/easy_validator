@@ -28,14 +28,14 @@ class Validator:
         import inspect
         from functools import wraps
         def decorator(fn):
-            
+            print("hhhhhhh",self.__framework)
             if self.__framework=="flask":
                 from flask import jsonify
                 @wraps(fn)
                 def wrapper(*params,**kwargs):
-    
+
                     try:
-                        validator()
+                        validator(*params,**kwargs)
                     except ValidationError as e:
 
                         return jsonify({"ValidationError":str(e)}),500
@@ -51,9 +51,9 @@ class Validator:
                 from quart import jsonify
                 @wraps(fn)
                 async def wrapper(*params,**kwargs):
-
+                    print("nnnnnn",params,kwargs)
                     try:
-                        await validator()
+                        await validator(*params,**kwargs)
                         
                     except ValidationError as e:
                         print({"ValidationError":str(e)})
@@ -114,10 +114,12 @@ class Validator:
 
 class UtilValidator(Validator):
 
-    def is_structure(self,structure:dict,required=False):
+    def is_structure(self,structure:dict,null=False,required=False):
      
 
         def is_structure(data:dict):
+            if structure==None and null:
+                return True
 
             def recursive(data,structure):
                 l=[]
@@ -171,7 +173,7 @@ class UtilValidator(Validator):
         exists_register.required=required
         return exists_register
 
-    def is_isostringformat(self,required=False):
+    def is_isostringformat(self,null=False,required=False):
         
 
         def is_isostringformat(date_string):
@@ -182,6 +184,8 @@ class UtilValidator(Validator):
             """
 
             from datetime import datetime
+            if date_string==None and null:
+                return True
             try:
                 datetime.strptime(date_string,"%Y-%m-%dT%H:%M:%S.%fZ")
                 return True
@@ -190,7 +194,7 @@ class UtilValidator(Validator):
         is_isostringformat.required=required
         return is_isostringformat
 
-    def is_isoformat(self,required=False):
+    def is_isoformat(self,null=False,required=False):
         
 
         def is_isoformat(date_string):
@@ -199,6 +203,8 @@ class UtilValidator(Validator):
             >>> is_isoformat('2022-09-30T00:25:40.338953')
             True
             """
+            if date_string==None and null:
+                return True
             from datetime import datetime
             try:
                 datetime.fromisoformat(date_string)
@@ -208,23 +214,38 @@ class UtilValidator(Validator):
         is_isoformat.required=required
         return is_isoformat
 
-    def is_isoformat(self,required=False):
+    def is_menor(self,paths,transformer,null=False,required=False):
         
 
-        def is_isoformat(date_string):
+        def is_menor(data):
             """Valida si una cadena de texto es isoformat 
 
             >>> is_isoformat('2022-09-30T00:25:40.338953')
             True
             """
-            from datetime import datetime
-            try:
-                datetime.fromisoformat(date_string)
+            if data==None and null:
                 return True
-            except ValueError:
-                return False
-        is_isoformat.required=required
-        return is_isoformat
+            for start,end in paths:
+                item=data[path[0]]
+                _path=path[0]
+                for p in path[1:]:
+                    _path+="."+p
+                    if type(item)==dict:
+                        if p not in item.keys():
+                            
+                            raise ValidationError(f"key '{_path}' not in {item.keys()}")
+                        item=item[p]
+                    elif p.isdigit():
+                        item=item[int(p)]
+
+                if not (transformer(start)<transformer(end)):
+                    return False
+
+            return True
+
+    
+        is_menor.required=required
+        return is_menor
 
 def replace(data,path,fn):
     path=path.split(".")
@@ -272,7 +293,7 @@ def group(*validators):
 
 def from_isostring(str_date):
     return date_time.strptime(str_date,"%Y-%m-%dT%H:%M:%S.%fZ")
-    
+
 def to_isostring(date_time):
     return date_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 util_validator=UtilValidator("quart")
