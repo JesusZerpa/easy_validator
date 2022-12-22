@@ -28,7 +28,6 @@ class Validator:
         import inspect
         from functools import wraps
         def decorator(fn):
-            print("hhhhhhh",self.__framework)
             if self.__framework=="flask":
                 from flask import jsonify
                 @wraps(fn)
@@ -43,15 +42,14 @@ class Validator:
                         return jsonify({"ValidationRequired":str(e)}),500
 
 
-                    return {"ValidationError":str(e)}
-                return fn(*params,**kwargs)
+                    return fn(*params,**kwargs)
 
         
             elif self.__framework=="quart":
                 from quart import jsonify
                 @wraps(fn)
                 async def wrapper(*params,**kwargs):
-                    print("nnnnnn",params,kwargs)
+                    
                     try:
                         await validator(*params,**kwargs)
                         
@@ -69,6 +67,7 @@ class Validator:
         return decorator
 
     def validate(self,data,schema):
+
         for index,elem in enumerate(schema):
             path=elem.split(".")
             required=False
@@ -82,11 +81,12 @@ class Validator:
                 continue
             item=data[path[0]]
             _path=path[0]
+       
             for p in path[1:]:
                 _path+="."+p
                 if type(item)==dict:
                     if p not in item.keys():
-                        
+                
                         raise ValidationError(f"key '{_path}' not in {item.keys()}")
                     item=item[p]
                 elif p.isdigit():
