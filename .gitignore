@@ -1,2 +1,3 @@
 my_validator.egg-info
 my_validator/__pycache__/*
+dist/*
