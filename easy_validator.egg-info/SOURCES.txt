@@ -1,7 +1,0 @@
-setup.py
-easy_validator/__init__.py
-easy_validator/example.py
-easy_validator.egg-info/PKG-INFO
-easy_validator.egg-info/SOURCES.txt
-easy_validator.egg-info/dependency_links.txt
-easy_validator.egg-info/top_level.txt

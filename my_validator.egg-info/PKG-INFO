@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
-Name: easy-validator
+Name: my-validator
 Version: 0.0.1
 Summary: Libreria de validación de datos
-Home-page: https://zerpatechnology.com
+Home-page: https://zerpatechnology.com/projects/easy_validator
 Author: Jesus Zerpa
 Author-email: jesus26abraham1996@gmail.com
 License: UNKNOWN
-Keywords: easy_validator
+Keywords: easy validator,flask,quart
 Platform: UNKNOWN
 
 UNKNOWN
